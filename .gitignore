@@ -1,0 +1,9 @@
+# Directorios de Node.js
+node_modules/
+
+# Directorios de Truffle
+build/
+
+# Archivos de configuración
+.env
+truffle-config.js
