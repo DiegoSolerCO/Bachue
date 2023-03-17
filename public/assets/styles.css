@@ -1,0 +1,25 @@
+/* Aquí puedes agregar tus estilos personalizados */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: #4CAF50;
+}
+
+header img {
+  width: 48px;
+  height: 48px;
+  margin-right: 1rem;
+}
+
+header h1 {
+  color: white;
+  margin: 0;
+}
