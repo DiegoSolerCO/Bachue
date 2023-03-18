@@ -3,67 +3,37 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract EcoBono is ERC721URIStorage {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
-
-    address private _platformOwner;
-
-    struct EcoBonoData {
-        uint256 tokenId;
-        string projectName;
-        uint256 emissionReduction;
-        string monitoringDataURI;
+contract Chibchacum is ERC721, ERC721URIStorage, Ownable {
+    struct Bono {
+        string name;
+        uint256 value;
     }
 
-    mapping(uint256 => EcoBonoData) private _ecoBonoData;
+    uint256 private _tokenIdCounter;
+    mapping(uint256 => Bono) private _bonos;
 
-    event EcoBonoCreated(uint256 indexed tokenId, string projectName, uint256 emissionReduction, string monitoringDataURI);
+    constructor() ERC721("Chibchacum", "CHB") {}
 
-    constructor() ERC721("EcoBono", "ECB") {
-        _platformOwner = msg.sender;
+    function createBono(string memory name, uint256 value, string memory tokenURI) public onlyOwner {
+        _tokenIdCounter = _tokenIdCounter + 1;
+        uint256 newTokenId = _tokenIdCounter;
+        _mint(owner(), newTokenId);
+        _setTokenURI(newTokenId, tokenURI);
+        _bonos[newTokenId] = Bono(name, value);
     }
 
-    function createEcoBono(
-        address to,
-        string memory projectName,
-        uint256 emissionReduction,
-        string memory monitoringDataURI
-    ) public returns (uint256) {
-        require(msg.sender == _platformOwner, "Only platform owner can create new EcoBonos");
-        _tokenIds.increment();
-        uint256 newTokenId = _tokenIds.current();
-
-        _mint(to, newTokenId);
-        _setTokenURI(newTokenId, monitoringDataURI);
-
-        EcoBonoData memory newEcoBonoData = EcoBonoData({
-            tokenId: newTokenId,
-            projectName: projectName,
-            emissionReduction: emissionReduction,
-            monitoringDataURI: monitoringDataURI
-        });
-
-        _ecoBonoData[newTokenId] = newEcoBonoData;
-
-        emit EcoBonoCreated(newTokenId, projectName, emissionReduction, monitoringDataURI);
-
-        return newTokenId;
+    function getBono(uint256 tokenId) public view returns (Bono memory) {
+        require(_exists(tokenId), "Chibchacum: Token no existe");
+        return _bonos[tokenId];
     }
 
-    function getEcoBonoData(uint256 tokenId) public view returns (EcoBonoData memory) {
-        require(_exists(tokenId), "Token ID does not exist");
-        return _ecoBonoData[tokenId];
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
     }
 
-    function platformOwner() public view returns (address) {
-        return _platformOwner;
-    }
-
-    function setPlatformOwner(address newPlatformOwner) public {
-        require(msg.sender == _platformOwner, "Only platform owner can change ownership");
-        _platformOwner = newPlatformOwner;
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
     }
 }
